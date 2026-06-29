@@ -32,7 +32,7 @@ class AuthController extends Controller
             'message' => 'Autenticado com sucesso.',
             'token' => $token,
             'user' => $this->userPayload($user),
-        ]);
+        ], Response::HTTP_OK);
     }
 
     public function logout(Request $request): JsonResponse
@@ -41,14 +41,14 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logout realizado com sucesso.',
-        ]);
+        ], Response::HTTP_OK);
     }
 
     public function me(Request $request): JsonResponse
     {
         return response()->json([
             'user' => $this->userPayload($request->user()),
-        ]);
+        ], Response::HTTP_OK);
     }
 
     private function userPayload(User $user): array
