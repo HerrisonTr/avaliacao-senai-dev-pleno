@@ -1,0 +1,15 @@
+body {
+    background: linear-gradient(135deg, #f4efe6 0%, #d9e7ff 100%);
+    min-height: 100vh;
+}
+
+.app-shell {
+    min-height: 100vh;
+}
+
+.panel {
+    padding: 1rem;
+    border-radius: 1rem;
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}

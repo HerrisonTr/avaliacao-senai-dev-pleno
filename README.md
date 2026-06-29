@@ -1,6 +1,6 @@
 # Avaliacao SENAI
 
-Projeto base em Laravel com ambiente Docker para PHP, Nginx e MySQL.
+Projeto com backend em Laravel e frontend separado, ambos executados com Docker.
 
 ## Stack
 
@@ -8,42 +8,38 @@ Projeto base em Laravel com ambiente Docker para PHP, Nginx e MySQL.
 - Laravel 13
 - MySQL 8
 - Nginx
-- Vite
-- Tailwind CSS 4
+- Frontend estatico com HTML, Bootstrap e JavaScript
 
 ## Estrutura
 
-- `docker-compose.yml`: orquestra os containers da aplicacao
+- `backend/`: API Laravel
+- `frontend/`: interface separada
 - `docker/`: configuracoes de PHP e Nginx
-- `src/`: codigo-fonte do Laravel
+- `docker-compose.yml`: orquestracao dos containers
+
+## Portas
+
+- `8080`: API Laravel
+- `8090`: frontend
+- `3306`: MySQL
 
 ## Como rodar com Docker
 
 ### 1. Subir os containers
 
-Na raiz do projeto, execute:
-
 ```bash
 docker compose up -d --build
 ```
 
-Isso sobe:
-
-- `app`: container PHP-FPM
-- `nginx`: servidor web na porta `8080`
-- `mysql`: banco de dados MySQL na porta `3306`
-
-### 2. Criar o arquivo de ambiente do Laravel
+### 2. Criar o arquivo de ambiente do backend
 
 ```bash
-cp src/.env.example src/.env
+cp backend/.env.example backend/.env
 ```
 
-### 3. Ajustar o banco no `.env`
+### 3. Configurar o banco no backend
 
-O projeto Laravel vem configurado por padrao para `sqlite`, mas o ambiente Docker sobe um `mysql`.
-
-No arquivo `src/.env`, ajuste para:
+No arquivo `backend/.env`, ajuste os dados abaixo:
 
 ```env
 APP_NAME="Avaliacao SENAI"
@@ -57,7 +53,7 @@ DB_USERNAME=herrison
 DB_PASSWORD=123456
 ```
 
-### 4. Instalar dependencias PHP
+### 4. Instalar dependencias do backend
 
 ```bash
 docker compose exec app composer install
@@ -75,12 +71,11 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate
 ```
 
-### 7. Acessar o sistema
-
-Abra no navegador:
+### 7. Acessar os ambientes
 
 ```text
-http://localhost:8080
+API: http://localhost:8080
+Frontend: http://localhost:8090
 ```
 
 ## Comandos uteis
@@ -109,7 +104,7 @@ Entrar no container PHP:
 docker compose exec app bash
 ```
 
-Rodar testes:
+Rodar testes do backend:
 
 ```bash
 docker compose exec app php artisan test
@@ -121,16 +116,24 @@ Rodar seeders:
 docker compose exec app php artisan db:seed
 ```
 
-## Primeira execucao recomendada
+## Frontend
 
-Se quiser fazer o setup inicial em sequencia:
+O frontend agora esta em `frontend/` e e servido por um container Nginx proprio.
+
+Arquivos iniciais:
+
+- `frontend/index.html`
+- `frontend/assets/css/styles.css`
+- `frontend/assets/js/app.js`
+
+## Primeira execucao recomendada
 
 ```bash
 docker compose up -d --build
-cp src/.env.example src/.env
+cp backend/.env.example backend/.env
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate
 ```
 
-Antes de rodar a migration, ajuste o `src/.env` para usar MySQL com as credenciais mostradas acima. Depois disso, acesse `http://localhost:8080`.
+Antes de rodar a migration, ajuste o `backend/.env` para usar MySQL com as credenciais mostradas acima.
