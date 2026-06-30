@@ -72,10 +72,6 @@ export function buildTimeOptions(slots, currentSlot = null) {
     };
 }
 
-export function isAvailablePeriod(slots, startTime, endTime) {
-    return slots.some((slot) => slot.start_time === startTime && slot.end_time === endTime);
-}
-
 export function formatOccupiedTimes(occupied = []) {
     if (!occupied.length) {
         return '';

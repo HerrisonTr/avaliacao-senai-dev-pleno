@@ -16,6 +16,7 @@ class AvailableTimesRequest extends FormRequest
         return [
             'appointment_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'attendant_id' => ['required', 'integer', 'exists:users,id'],
+            'ignore_appointment_id' => ['nullable', 'integer', 'exists:appointments,id'],
         ];
     }
 
@@ -28,6 +29,8 @@ class AvailableTimesRequest extends FormRequest
             'attendant_id.required' => 'Informe o atendente.',
             'attendant_id.integer' => 'O atendente informado é inválido.',
             'attendant_id.exists' => 'O atendente informado não foi encontrado.',
+            'ignore_appointment_id.integer' => 'O agendamento ignorado é inválido.',
+            'ignore_appointment_id.exists' => 'O agendamento ignorado não foi encontrado.',
         ];
     }
 }

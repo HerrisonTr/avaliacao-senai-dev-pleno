@@ -118,7 +118,7 @@ class AppointmentSchedulingService
      *     occupied: list<array{start_time: string, end_time: string}>
      * }
      */
-    public function availableTimes(string $date, int $attendantId): array
+    public function availableTimes(string $date, int $attendantId, ?int $ignoreAppointmentId = null): array
     {
         $attendant = User::query()->find($attendantId);
         $this->ensureAttendantIsValid($attendant);
@@ -135,6 +135,10 @@ class AppointmentSchedulingService
             ->where('attendant_id', $attendantId)
             ->whereDate('appointment_date', $date)
             ->scheduled()
+            ->when(
+                $ignoreAppointmentId !== null,
+                fn ($query) => $query->whereKeyNot($ignoreAppointmentId)
+            )
             ->get(['start_time', 'end_time']);
 
         $now = CarbonImmutable::now();

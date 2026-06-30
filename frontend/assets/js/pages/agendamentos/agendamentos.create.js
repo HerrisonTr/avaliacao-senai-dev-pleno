@@ -10,7 +10,6 @@ import { scheduleService } from '../../services/scheduleService.js';
 import {
     buildTimeOptions,
     formatOccupiedTimes,
-    isAvailablePeriod,
     validateAppointmentForm,
 } from './agendamentos.form.js';
 
@@ -142,13 +141,6 @@ export function initAppointmentCreate({ canCreateAppointment, onSuccess }) {
         const payload = getTrimmedFormData(appointmentForm, ['attendant_id', 'service_id']);
 
         const validationErrors = validateAppointmentForm(payload);
-
-        if (
-            Object.keys(validationErrors).length === 0
-            && !isAvailablePeriod(availableSlots, payload.start_time, payload.end_time)
-        ) {
-            validationErrors.end_time = 'Selecione um intervalo disponível para o agendamento.';
-        }
 
         if (Object.keys(validationErrors).length > 0) {
             Object.entries(validationErrors).forEach(([field, message]) => {

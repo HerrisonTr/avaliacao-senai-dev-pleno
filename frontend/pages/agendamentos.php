@@ -164,6 +164,8 @@ $pageConfig = [
             <form id="appointment-form-edit" novalidate>
                 <input type="hidden" id="appointment-edit-id" name="id">
                 <div class="modal-body">
+                    <div id="appointment-edit-occupied-times" class="alert alert-warning d-none mb-0" role="alert"></div>
+
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="appointment-edit-attendant" class="form-label">Atendente *</label>
@@ -179,7 +181,7 @@ $pageConfig = [
                             </select>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <label for="appointment-edit-date" class="form-label">Data *</label>
                             <input type="date" id="appointment-edit-date" name="appointment_date" class="form-control" required>
                             <div class="invalid-feedback"></div>
@@ -191,9 +193,6 @@ $pageConfig = [
                             </select>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="col-12">
-                            <div id="appointment-edit-occupied-times" class="alert alert-warning d-none mb-0" role="alert"></div>
-                        </div>
                         <div class="col-md-6">
                             <label for="appointment-edit-end-time" class="form-label">Horário de fim *</label>
                             <select id="appointment-edit-end-time" name="end_time" class="form-select" required>
@@ -201,7 +200,7 @@ $pageConfig = [
                             </select>
                             <div class="invalid-feedback"></div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <label for="appointment-edit-customer-name" class="form-label">Nome do cliente *</label>
                             <input type="text" id="appointment-edit-customer-name" name="customer_name" class="form-control" required>
                             <div class="invalid-feedback"></div>

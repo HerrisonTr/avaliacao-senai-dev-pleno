@@ -69,6 +69,7 @@ class AppointmentsController extends Controller
                 'data' => $this->schedulingService->availableTimes(
                     $data['appointment_date'],
                     (int) $data['attendant_id'],
+                    isset($data['ignore_appointment_id']) ? (int) $data['ignore_appointment_id'] : null,
                 ),
             ], Response::HTTP_OK);
         } catch (AppointmentConflictException $exception) {

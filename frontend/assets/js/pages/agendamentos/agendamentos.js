@@ -3,9 +3,10 @@ import { escapeHtml, toast } from '../../ui.js';
 import { http } from '../../http.js';
 import { scheduleService } from '../../services/scheduleService.js';
 import { userService } from '../../services/userService.js';
+import { appointmentStatusLabels, getStatusBadgeClass } from './agendamentos.form.js';
+import { initAppointmentsCalendar } from './agendamentos.calendar.js';
 import { initAppointmentCreate } from './agendamentos.create.js';
 import { initAppointmentEdit } from './agendamentos.edit.js';
-import { appointmentStatusLabels, getStatusBadgeClass } from './agendamentos.form.js';
 import { initAppointmentStatus } from './agendamentos.status.js';
 
 await auth.protectPage();
@@ -14,14 +15,12 @@ const createAppointmentButton = document.querySelector('#create-appointment-butt
 const appointmentsTableBody = document.querySelector('#appointments-table-body');
 const viewAppointmentModalElement = document.querySelector('#modal-visualizacao-agendamento');
 const viewAppointmentModal = bootstrap.Modal.getOrCreateInstance(viewAppointmentModalElement);
-const appointmentsCalendarElement = document.querySelector('#appointments-calendar');
 
 const canListAppointments = auth.hasPermission('appointment.list');
 const canCreateAppointment = auth.hasPermission('appointment.create');
 const canUpdateAppointment = auth.hasPermission('appointment.update');
 
 let appointmentsCache = [];
-let appointmentsCalendar = null;
 
 function formatDate(date) {
     if (!date) {
@@ -32,22 +31,6 @@ function formatDate(date) {
     return `${day}/${month}/${year}`;
 }
 
-function canManageAppointment(appointment) {
-    return canUpdateAppointment && appointment.status === 'scheduled';
-}
-
-function getStatusEventColor(status) {
-    if (status === 'completed') {
-        return '#198754';
-    }
-
-    if (status === 'cancelled') {
-        return '#dc3545';
-    }
-
-    return '#0d6efd';
-}
-
 function formatTimeRange(startTime, endTime) {
     if (!startTime || !endTime) {
         return '-';
@@ -56,20 +39,8 @@ function formatTimeRange(startTime, endTime) {
     return `${startTime} às ${endTime}`;
 }
 
-function buildCalendarEvents(appointments) {
-    return appointments
-        .filter((appointment) => appointment.appointment_date && appointment.start_time && appointment.end_time)
-        .map((appointment) => ({
-            id: String(appointment.id),
-            title: `${appointment.customer_name ?? 'Sem nome'} • ${appointment.service?.name ?? 'Serviço'}`,
-            start: `${appointment.appointment_date}T${appointment.start_time}`,
-            end: `${appointment.appointment_date}T${appointment.end_time}`,
-            backgroundColor: getStatusEventColor(appointment.status),
-            borderColor: getStatusEventColor(appointment.status),
-            extendedProps: {
-                appointmentId: appointment.id,
-            },
-        }));
+function canManageAppointment(appointment) {
+    return canUpdateAppointment && appointment.status === 'scheduled';
 }
 
 function fillViewAppointmentModal(appointment) {
@@ -86,51 +57,6 @@ function fillViewAppointmentModal(appointment) {
 function openViewAppointmentModal(appointment) {
     fillViewAppointmentModal(appointment);
     viewAppointmentModal.show();
-}
-
-function initAppointmentsCalendar() {
-    if (!appointmentsCalendarElement || typeof FullCalendar === 'undefined') {
-        return;
-    }
-
-    appointmentsCalendar = new FullCalendar.Calendar(appointmentsCalendarElement, {
-        locale: 'pt-br',
-        initialView: 'dayGridMonth',
-        height: 'auto',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
-        },
-        buttonText: {
-            today: 'Hoje',
-            month: 'Mês',
-            week: 'Semana',
-            day: 'Dia',
-        },
-        noEventsContent: 'Nenhum agendamento cadastrado.',
-        events: [],
-        eventClick(info) {
-            const appointment = getAppointmentById(info.event.extendedProps.appointmentId);
-
-            if (!appointment) {
-                return;
-            }
-
-            openViewAppointmentModal(appointment);
-        },
-    });
-
-    appointmentsCalendar.render();
-}
-
-function refreshAppointmentsCalendar(appointments) {
-    if (!appointmentsCalendar) {
-        return;
-    }
-
-    appointmentsCalendar.removeAllEvents();
-    appointmentsCalendar.addEventSource(buildCalendarEvents(appointments));
 }
 
 function buildActionButtons(appointment) {
@@ -181,6 +107,23 @@ function renderAppointments(appointments) {
     `).join('');
 }
 
+function getAppointmentById(appointmentId) {
+    return appointmentsCache.find((appointment) => Number(appointment.id) === Number(appointmentId)) ?? null;
+}
+
+const appointmentsCalendar = initAppointmentsCalendar({
+    selector: '#appointments-calendar',
+    onEventClick(appointmentId) {
+        const appointment = getAppointmentById(appointmentId);
+
+        if (!appointment) {
+            return;
+        }
+
+        openViewAppointmentModal(appointment);
+    },
+});
+
 async function loadAppointments() {
     if (!canListAppointments) {
         appointmentsTableBody.innerHTML = `
@@ -201,7 +144,7 @@ async function loadAppointments() {
         const response = await scheduleService.list();
         appointmentsCache = response.data ?? [];
         renderAppointments(appointmentsCache);
-        refreshAppointmentsCalendar(appointmentsCache);
+        appointmentsCalendar?.setEvents(appointmentsCache);
     } catch (error) {
         appointmentsTableBody.innerHTML = `
             <tr>
@@ -214,10 +157,6 @@ async function loadAppointments() {
             text: error.message || 'Não foi possível carregar os agendamentos.',
         });
     }
-}
-
-function getAppointmentById(appointmentId) {
-    return appointmentsCache.find((appointment) => Number(appointment.id) === Number(appointmentId)) ?? null;
 }
 
 const appointmentCreateController = initAppointmentCreate({
@@ -337,7 +276,6 @@ appointmentsTableBody?.addEventListener('click', async (event) => {
     }
 });
 
-initAppointmentsCalendar();
 await loadAttendants();
 await loadServices();
 await loadAppointments();

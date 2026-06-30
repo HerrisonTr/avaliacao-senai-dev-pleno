@@ -10,7 +10,6 @@ import { scheduleService } from '../../services/scheduleService.js';
 import {
     buildTimeOptions,
     formatOccupiedTimes,
-    isAvailablePeriod,
     validateAppointmentForm,
 } from './agendamentos.form.js';
 
@@ -50,7 +49,6 @@ function initEditAppointmentUi() {
 
 function resetAvailableTimesEditState() {
     editAvailableSlots = [];
-    currentAppointmentSlot = null;
     appointmentEditFieldMap.start_time.innerHTML = '<option value="">Selecione um horário</option>';
     appointmentEditFieldMap.end_time.innerHTML = '<option value="">Selecione um horário</option>';
     $('#appointment-edit-start-time').val('').trigger('change');
@@ -62,6 +60,7 @@ function resetAvailableTimesEditState() {
 async function loadAvailableTimesForEdit() {
     const attendantId = appointmentEditFieldMap.attendant_id.value;
     const appointmentDate = appointmentEditFieldMap.appointment_date.value;
+    const appointmentId = appointmentEditId.value;
 
     resetAvailableTimesEditState();
 
@@ -73,6 +72,7 @@ async function loadAvailableTimesForEdit() {
         const response = await scheduleService.availableTimes({
             attendant_id: attendantId,
             appointment_date: appointmentDate,
+            ignore_appointment_id: appointmentId,
         });
 
         const available = response.data?.available ?? [];
@@ -105,6 +105,7 @@ async function loadAvailableTimesForEdit() {
 function resetAppointmentEditFormState() {
     appointmentFormEdit.reset();
     appointmentEditId.value = '';
+    currentAppointmentSlot = null;
     clearFieldErrors(appointmentEditFieldMap);
     $('#appointment-edit-attendant').val('').trigger('change');
     $('#appointment-edit-service').val('').trigger('change');
@@ -180,13 +181,6 @@ export function initAppointmentEdit({ onSuccess }) {
         const payload = getTrimmedFormData(appointmentFormEdit, ['attendant_id', 'service_id']);
 
         const validationErrors = validateAppointmentForm(payload);
-
-        if (
-            Object.keys(validationErrors).length === 0
-            && !isAvailablePeriod(editAvailableSlots, payload.start_time, payload.end_time)
-        ) {
-            validationErrors.end_time = 'Selecione um intervalo disponível para o agendamento.';
-        }
 
         if (Object.keys(validationErrors).length > 0) {
             Object.entries(validationErrors).forEach(([field, message]) => {
