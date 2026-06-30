@@ -25,6 +25,12 @@
                         <p>Disponibilidades</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" data-route="agendamentos" class="nav-link">
+                        <i class="nav-icon bi bi-journal-check"></i>
+                        <p>Agendamentos</p>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>
