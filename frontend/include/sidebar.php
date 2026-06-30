@@ -19,6 +19,12 @@
                         <p>Usuários</p>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" data-route="disponibilidades" class="nav-link">
+                        <i class="nav-icon bi bi-calendar-week"></i>
+                        <p>Disponibilidades</p>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>

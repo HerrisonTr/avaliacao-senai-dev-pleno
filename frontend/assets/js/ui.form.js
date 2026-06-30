@@ -2,6 +2,15 @@ export function clearFieldErrors(fieldMap) {
     Object.values(fieldMap).forEach((field) => {
         field.classList.remove('is-invalid');
 
+        if (field._flatpickr?.altInput) {
+            field._flatpickr.altInput.classList.remove('is-invalid');
+        }
+
+        const select2Selection = field.nextElementSibling?.querySelector('.select2-selection');
+        if (select2Selection) {
+            select2Selection.classList.remove('is-invalid');
+        }
+
         const feedback = field.parentElement.querySelector('.invalid-feedback');
         if (feedback) {
             feedback.textContent = '';
@@ -17,6 +26,15 @@ export function setFieldError(fieldMap, fieldName, message) {
     }
 
     field.classList.add('is-invalid');
+
+    if (field._flatpickr?.altInput) {
+        field._flatpickr.altInput.classList.add('is-invalid');
+    }
+
+    const select2Selection = field.nextElementSibling?.querySelector('.select2-selection');
+    if (select2Selection) {
+        select2Selection.classList.add('is-invalid');
+    }
 
     const feedback = field.parentElement.querySelector('.invalid-feedback');
     if (feedback) {

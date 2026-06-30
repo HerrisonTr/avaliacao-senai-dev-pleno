@@ -7,5 +7,6 @@ export function base_url(page, extension = '.php') {
 
 export const routes = {
     dashboard: base_url('pages/dashboard'),
+    disponibilidades: base_url('pages/disponibilidades'),
     usuarios: base_url('pages/usuarios'),
 };

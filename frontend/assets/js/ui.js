@@ -50,6 +50,49 @@ export function confirmDialog({
     });
 }
 
+export function initSelect2({
+    selectors = [],
+    dropdownParent = null,
+    placeholder = 'Selecione',
+    theme = 'bootstrap-5',
+    allowClear = true,
+    width = '100%',
+} = {}) {
+    const dropdownParentElement = dropdownParent ? $(dropdownParent) : undefined;
+
+    selectors.forEach((selector) => {
+        $(selector).select2({
+            width,
+            dropdownParent: dropdownParentElement,
+            placeholder,
+            theme,
+            allowClear,
+        });
+    });
+}
+
+export function initFlatpickrTime(selectors = [], options = {}) {
+    const baseOptions = {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: 'H:i',
+        altFormat: 'H:i',
+        time_24hr: true,
+        minuteIncrement: 15,
+        allowInput: false,
+        clickOpens: true,
+        altInput: true,
+        altInputClass: 'form-control',
+    };
+
+    selectors.forEach((selector) => {
+        flatpickr(selector, {
+            ...baseOptions,
+            ...options,
+        });
+    });
+}
+
 export function escapeHtml(value) {
     return String(value ?? '')
         .replaceAll('&', '&amp;')
