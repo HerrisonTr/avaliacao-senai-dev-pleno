@@ -4,10 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
-class FuncoesEPermissoesSeeder extends Seeder
+class PermissoesSeeder extends Seeder
 {
     /**
      * @var list<string>
@@ -27,12 +26,6 @@ class FuncoesEPermissoesSeeder extends Seeder
         foreach ($this->permissoes as $permissao) {
             Permission::findOrCreate($permissao, 'web');
         }
-
-        $papelAdministrador = Role::findOrCreate('Administrador', 'web');
-        $papelAtendente = Role::findOrCreate('Atendente', 'web');
-
-        $papelAdministrador->syncPermissions($this->permissoes);
-        $papelAtendente->syncPermissions(['user.list']);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
