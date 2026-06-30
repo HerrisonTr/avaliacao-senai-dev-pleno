@@ -22,6 +22,11 @@ class PermissoesSeeder extends Seeder
         'attendant-availability.create',
         'attendant-availability.update',
         'attendant-availability.delete',
+        'service.list',
+        'appointment.list',
+        'appointment.view',
+        'appointment.create',
+        'appointment.update',
     ];
 
     public function run(): void

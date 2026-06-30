@@ -22,6 +22,11 @@ class FuncoesUsuariosSeeder extends Seeder
         'attendant-availability.create',
         'attendant-availability.update',
         'attendant-availability.delete',
+        'service.list',
+        'appointment.list',
+        'appointment.view',
+        'appointment.create',
+        'appointment.update',
     ];
 
     public function run(): void
@@ -36,6 +41,11 @@ class FuncoesUsuariosSeeder extends Seeder
             'user.list',
             'attendant-availability.list',
             'attendant-availability.view',
+            'service.list',
+            'appointment.list',
+            'appointment.view',
+            'appointment.create',
+            'appointment.update',
         ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
