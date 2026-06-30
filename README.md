@@ -78,6 +78,23 @@ API: http://localhost:8080
 Frontend: http://localhost:8090
 ```
 
+### 8. Popular o banco com os dados iniciais
+
+```bash
+docker compose exec app php artisan db:seed
+```
+
+### 9. Primeiro acesso
+
+Após rodar a seed, acesse o frontend em `http://localhost:8090` e entre com um dos usuários abaixo:
+
+- Administrador
+  - E-mail: `admin@admin.com`
+  - Senha: `123qwe!!`
+- Atendente
+  - E-mail: `atendente@atendente.com`
+  - Senha: `123qwe!!`
+
 ## Comandos uteis
 
 Subir containers:
@@ -118,14 +135,13 @@ docker compose exec app php artisan db:seed
 
 ## Ajustando permissões
 
-Se houver erro de permissão no Laravel, execute:
+Se houver erro de permissão no Laravel, execute os comandos abaixo dentro do container `app`:
 
 ```bash
-chmod -R 775 /var/www/html/bootstrap/cache
-chmod -R 775 /var/www/html/storage
-
-chown -R www-data:www-data /var/www/html/bootstrap/cache
-chown -R www-data:www-data /var/www/html/storage
+docker compose exec app chmod -R 775 /var/www/html/bootstrap/cache
+docker compose exec app chmod -R 775 /var/www/html/storage
+docker compose exec app chown -R www-data:www-data /var/www/html/bootstrap/cache
+docker compose exec app chown -R www-data:www-data /var/www/html/storage
 ```
 
 ## Erro de permissão no VS Code
@@ -156,6 +172,7 @@ cp backend/.env.example backend/.env
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed
 ```
 
-Antes de rodar a migration, ajuste o `backend/.env` para usar MySQL com as credenciais mostradas acima.
+Antes de rodar a migration, ajuste o `backend/.env` para usar MySQL com as credenciais mostradas acima. Depois da seed, o acesso ao sistema pode ser feito com os usuários `admin@admin.com` ou `atendente@atendente.com`, ambos com a senha `123qwe!!`.
