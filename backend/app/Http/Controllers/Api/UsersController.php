@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Api\AlterarSenhaUsuarioRequest;
-use App\Http\Requests\Api\AlterarStatusUsuarioRequest;
-use App\Http\Requests\Api\AtualizarUsuarioRequest;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\CadastrarUsuarioRequest;
-use App\Http\Requests\Api\ExcluirUsuarioRequest;
-use App\Http\Requests\Api\ListarUsuariosRequest;
+use App\Http\Requests\Api\Users\DeleteUserRequest;
+use App\Http\Requests\Api\Users\StoreUserRequest;
+use App\Http\Requests\Api\Users\UpdateUserPasswordRequest;
+use App\Http\Requests\Api\Users\UpdateUserRequest;
+use App\Http\Requests\Api\Users\UpdateUserStatusRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,16 +18,16 @@ use Throwable;
 
 class UsersController extends Controller
 {
-    public function index(ListarUsuariosRequest $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $usuariosPaginados = User::query()
+            $paginatedUsers = User::query()
                 ->with('roles:id,name')
                 ->orderBy('id')
                 ->paginate(15)
-                ->through(fn (User $usuario) => $this->userPayload($usuario));
+                ->through(fn (User $user) => $this->userPayload($user));
 
-            return response()->json($usuariosPaginados, Response::HTTP_OK);
+            return response()->json($paginatedUsers, Response::HTTP_OK);
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -37,30 +37,30 @@ class UsersController extends Controller
         }
     }
 
-    public function store(CadastrarUsuarioRequest $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
         try {
-            $dadosValidados = $request->validated();
+            $validatedData = $request->validated();
 
-            /** @var Role $papel */
-            $papel = Role::query()->findOrFail($dadosValidados['role_id']);
+            /** @var Role $role */
+            $role = Role::query()->findOrFail($validatedData['role_id']);
 
-            $usuario = DB::transaction(function () use ($dadosValidados, $papel): User {
-                $usuario = User::query()->create([
-                    'name' => $dadosValidados['name'],
-                    'email' => $dadosValidados['email'],
-                    'password' => $dadosValidados['password'],
+            $user = DB::transaction(function () use ($validatedData, $role): User {
+                $user = User::query()->create([
+                    'name' => $validatedData['name'],
+                    'email' => $validatedData['email'],
+                    'password' => $validatedData['password'],
                 ]);
 
-                $usuario->syncRoles([$papel]);
-                $usuario->load('roles:id,name');
+                $user->syncRoles([$role]);
+                $user->load('roles:id,name');
 
-                return $usuario;
+                return $user;
             });
 
             return response()->json([
                 'message' => 'Usuário cadastrado com sucesso.',
-                'user' => $this->userPayload($usuario),
+                'user' => $this->userPayload($user),
             ], Response::HTTP_CREATED);
         } catch (Throwable $throwable) {
             report($throwable);
@@ -71,21 +71,21 @@ class UsersController extends Controller
         }
     }
 
-    public function update(AtualizarUsuarioRequest $request, User $user): JsonResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
         try {
-            $dadosValidados = $request->validated();
+            $validatedData = $request->validated();
 
-            /** @var Role $papel */
-            $papel = Role::query()->findOrFail($dadosValidados['role_id']);
+            /** @var Role $role */
+            $role = Role::query()->findOrFail($validatedData['role_id']);
 
-            $usuarioAtualizado = DB::transaction(function () use ($dadosValidados, $papel, $user): User {
+            $updatedUser = DB::transaction(function () use ($validatedData, $role, $user): User {
                 $user->update([
-                    'name' => $dadosValidados['name'],
-                    'email' => $dadosValidados['email'],
+                    'name' => $validatedData['name'],
+                    'email' => $validatedData['email'],
                 ]);
 
-                $user->syncRoles([$papel]);
+                $user->syncRoles([$role]);
                 $user->load('roles:id,name');
 
                 return $user;
@@ -93,7 +93,7 @@ class UsersController extends Controller
 
             return response()->json([
                 'message' => 'Usuário atualizado com sucesso.',
-                'user' => $this->userPayload($usuarioAtualizado),
+                'user' => $this->userPayload($updatedUser),
             ], Response::HTTP_OK);
         } catch (Throwable $throwable) {
             report($throwable);
@@ -104,7 +104,7 @@ class UsersController extends Controller
         }
     }
 
-    public function updatePassword(AlterarSenhaUsuarioRequest $request, User $user): JsonResponse
+    public function updatePassword(UpdateUserPasswordRequest $request, User $user): JsonResponse
     {
         try {
             $user->update([
@@ -123,7 +123,7 @@ class UsersController extends Controller
         }
     }
 
-    public function updateStatus(AlterarStatusUsuarioRequest $request, User $user): JsonResponse
+    public function updateStatus(UpdateUserStatusRequest $request, User $user): JsonResponse
     {
         try {
             $user->update([
@@ -144,7 +144,7 @@ class UsersController extends Controller
         }
     }
 
-    public function destroy(ExcluirUsuarioRequest $request, User $user): JsonResponse
+    public function destroy(DeleteUserRequest $request, User $user): JsonResponse
     {
         try {
             $user->delete();
@@ -161,14 +161,14 @@ class UsersController extends Controller
         }
     }
 
-    private function userPayload(User $usuario): array
+    private function userPayload(User $user): array
     {
         return [
-            'id' => $usuario->id,
-            'name' => $usuario->name,
-            'email' => $usuario->email,
-            'role' => $usuario->roles->first()?->name,
-            'active' => $usuario->active,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->roles->first()?->name,
+            'active' => $user->active,
         ];
     }
 }

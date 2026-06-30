@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "backend"
+    }
+  ],
+  "settings": {
+    "intelephense.environment.includePaths": [
+      "backend"
+    ]
+  }
+}

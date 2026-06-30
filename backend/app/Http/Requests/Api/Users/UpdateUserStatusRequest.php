@@ -1,20 +1,21 @@
 <?php
 
-namespace App\Http\Requests\Api;
+namespace App\Http\Requests\Api\Users;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ExcluirUsuarioRequest extends FormRequest
+class UpdateUserStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
         $usuarioAutenticado = $this->user();
+
         /** @var User|null $usuarioDaRota */
         $usuarioDaRota = $this->route('user');
 
-        // Não permite excluir o próprio usuário
-        if (! $usuarioAutenticado || ! $usuarioAutenticado->can('user.delete')) {
+        // Não permite desabilitar o próprio usuário
+        if (! $usuarioAutenticado || ! $usuarioAutenticado->can('user.update')) {
             return false;
         }
 
@@ -27,6 +28,8 @@ class ExcluirUsuarioRequest extends FormRequest
 
     public function rules(): array
     {
-        return [];
+        return [
+            'active' => ['required', 'boolean'],
+        ];
     }
 }

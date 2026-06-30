@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api;
+namespace App\Http\Requests\Api\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-class AlterarSenhaUsuarioRequest extends FormRequest
+class UpdateUserPasswordRequest extends FormRequest
 {
     public function authorize(): bool
     {
