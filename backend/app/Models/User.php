@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -33,5 +34,15 @@ class User extends Authenticatable
             'password' => 'hashed',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    public function attendantAvailabilities(): HasMany
+    {
+        return $this->hasMany(AttendantAvailability::class, 'attendant_id');
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'attendant_id');
     }
 }
