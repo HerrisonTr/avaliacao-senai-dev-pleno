@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AppointmentsController;
 use App\Http\Controllers\Api\AttendantAvailabilityController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ServicesController;
 use App\Http\Controllers\Api\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,5 +29,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{availability}', [AttendantAvailabilityController::class, 'update'])->middleware('can:attendant-availability.update');
         Route::patch('/{availability}/status', [AttendantAvailabilityController::class, 'updateStatus'])->middleware('can:attendant-availability.update');
         Route::delete('/{availability}', [AttendantAvailabilityController::class, 'destroy'])->middleware('can:attendant-availability.delete');
+    });
+
+    Route::get('/services', [ServicesController::class, 'index'])->middleware('can:service.list');
+
+    Route::prefix('appointments')->group(function () {
+        Route::get('/', [AppointmentsController::class, 'index'])->middleware('can:appointment.list');
+        Route::get('/available-times', [AppointmentsController::class, 'availableTimes'])->middleware('can:appointment.list');
+        Route::get('/available-attendants', [AppointmentsController::class, 'availableAttendants'])->middleware('can:appointment.list');
+        Route::get('/{appointment}', [AppointmentsController::class, 'show'])->middleware('can:appointment.view');
+        Route::post('/', [AppointmentsController::class, 'store'])->middleware('can:appointment.create');
+        Route::put('/{appointment}', [AppointmentsController::class, 'update'])->middleware('can:appointment.update');
+        Route::patch('/{appointment}/status', [AppointmentsController::class, 'updateStatus'])->middleware('can:appointment.update');
     });
 });
