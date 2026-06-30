@@ -43,6 +43,15 @@ $pageConfig = [
                 </div>
             </div>
 
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Calendário de agendamentos</h3>
+                </div>
+                <div class="card-body">
+                    <div id="appointments-calendar"></div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Agendamentos cadastrados</h3>

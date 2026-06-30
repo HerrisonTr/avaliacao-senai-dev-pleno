@@ -14,6 +14,8 @@ $pageScripts = $pageConfig['scripts'] ?? [];
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js" crossorigin="anonymous"></script>
         <script src="/assets/js/adminlte/adminlte.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script type="module" src="/assets/js/ui.js"></script>

@@ -14,12 +14,14 @@ const createAppointmentButton = document.querySelector('#create-appointment-butt
 const appointmentsTableBody = document.querySelector('#appointments-table-body');
 const viewAppointmentModalElement = document.querySelector('#modal-visualizacao-agendamento');
 const viewAppointmentModal = bootstrap.Modal.getOrCreateInstance(viewAppointmentModalElement);
+const appointmentsCalendarElement = document.querySelector('#appointments-calendar');
 
 const canListAppointments = auth.hasPermission('appointment.list');
 const canCreateAppointment = auth.hasPermission('appointment.create');
 const canUpdateAppointment = auth.hasPermission('appointment.update');
 
 let appointmentsCache = [];
+let appointmentsCalendar = null;
 
 function formatDate(date) {
     if (!date) {
@@ -34,12 +36,40 @@ function canManageAppointment(appointment) {
     return canUpdateAppointment && appointment.status === 'scheduled';
 }
 
+function getStatusEventColor(status) {
+    if (status === 'completed') {
+        return '#198754';
+    }
+
+    if (status === 'cancelled') {
+        return '#dc3545';
+    }
+
+    return '#0d6efd';
+}
+
 function formatTimeRange(startTime, endTime) {
     if (!startTime || !endTime) {
         return '-';
     }
 
     return `${startTime} às ${endTime}`;
+}
+
+function buildCalendarEvents(appointments) {
+    return appointments
+        .filter((appointment) => appointment.appointment_date && appointment.start_time && appointment.end_time)
+        .map((appointment) => ({
+            id: String(appointment.id),
+            title: `${appointment.customer_name ?? 'Sem nome'} • ${appointment.service?.name ?? 'Serviço'}`,
+            start: `${appointment.appointment_date}T${appointment.start_time}`,
+            end: `${appointment.appointment_date}T${appointment.end_time}`,
+            backgroundColor: getStatusEventColor(appointment.status),
+            borderColor: getStatusEventColor(appointment.status),
+            extendedProps: {
+                appointmentId: appointment.id,
+            },
+        }));
 }
 
 function fillViewAppointmentModal(appointment) {
@@ -51,6 +81,56 @@ function fillViewAppointmentModal(appointment) {
     document.querySelector('#appointment-view-time').value = formatTimeRange(appointment.start_time, appointment.end_time);
     document.querySelector('#appointment-view-customer-phone').value = appointment.customer_phone ?? '';
     document.querySelector('#appointment-view-customer-email').value = appointment.customer_email ?? '';
+}
+
+function openViewAppointmentModal(appointment) {
+    fillViewAppointmentModal(appointment);
+    viewAppointmentModal.show();
+}
+
+function initAppointmentsCalendar() {
+    if (!appointmentsCalendarElement || typeof FullCalendar === 'undefined') {
+        return;
+    }
+
+    appointmentsCalendar = new FullCalendar.Calendar(appointmentsCalendarElement, {
+        locale: 'pt-br',
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        },
+        buttonText: {
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana',
+            day: 'Dia',
+        },
+        noEventsContent: 'Nenhum agendamento cadastrado.',
+        events: [],
+        eventClick(info) {
+            const appointment = getAppointmentById(info.event.extendedProps.appointmentId);
+
+            if (!appointment) {
+                return;
+            }
+
+            openViewAppointmentModal(appointment);
+        },
+    });
+
+    appointmentsCalendar.render();
+}
+
+function refreshAppointmentsCalendar(appointments) {
+    if (!appointmentsCalendar) {
+        return;
+    }
+
+    appointmentsCalendar.removeAllEvents();
+    appointmentsCalendar.addEventSource(buildCalendarEvents(appointments));
 }
 
 function buildActionButtons(appointment) {
@@ -121,6 +201,7 @@ async function loadAppointments() {
         const response = await scheduleService.list();
         appointmentsCache = response.data ?? [];
         renderAppointments(appointmentsCache);
+        refreshAppointmentsCalendar(appointmentsCache);
     } catch (error) {
         appointmentsTableBody.innerHTML = `
             <tr>
@@ -231,8 +312,7 @@ appointmentsTableBody?.addEventListener('click', async (event) => {
     }
 
     if (action === 'view') {
-        fillViewAppointmentModal(appointment);
-        viewAppointmentModal.show();
+        openViewAppointmentModal(appointment);
         return;
     }
 
@@ -257,6 +337,7 @@ appointmentsTableBody?.addEventListener('click', async (event) => {
     }
 });
 
+initAppointmentsCalendar();
 await loadAttendants();
 await loadServices();
 await loadAppointments();
