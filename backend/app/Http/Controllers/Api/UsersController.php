@@ -21,13 +21,16 @@ class UsersController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $paginatedUsers = User::query()
+            $users = User::query()
                 ->with('roles:id,name')
                 ->orderBy('id')
-                ->paginate(15)
-                ->through(fn (User $user) => $this->userPayload($user));
+                ->get()
+                ->map(fn (User $user) => $this->userPayload($user))
+                ->values();
 
-            return response()->json($paginatedUsers, Response::HTTP_OK);
+            return response()->json([
+                'data' => $users,
+            ], Response::HTTP_OK);
         } catch (Throwable $throwable) {
             report($throwable);
 
@@ -107,6 +110,16 @@ class UsersController extends Controller
     public function updatePassword(UpdateUserPasswordRequest $request, User $user): JsonResponse
     {
         try {
+            $usuarioAutenticado = $request->user();
+            $podeAtualizarSenha = $usuarioAutenticado?->can('user.update')
+                || ($usuarioAutenticado?->hasRole('Atendente') && $usuarioAutenticado->is($user));
+
+            if (! $podeAtualizarSenha) {
+                return response()->json([
+                    'message' => 'Você não tem permissão para atualizar esta senha.',
+                ], Response::HTTP_FORBIDDEN);
+            }
+
             $user->update([
                 'password' => $request->validated()['password'],
             ]);

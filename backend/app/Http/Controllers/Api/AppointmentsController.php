@@ -50,9 +50,11 @@ class AppointmentsController extends Controller
             )
             ->orderBy('appointment_date')
             ->orderBy('start_time')
-            ->paginate(15);
+            ->get();
 
-        return response()->json($appointments, Response::HTTP_OK);
+        return response()->json([
+            'data' => $appointments,
+        ], Response::HTTP_OK);
     }
 
     /**
