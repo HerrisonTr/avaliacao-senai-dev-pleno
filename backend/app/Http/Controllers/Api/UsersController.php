@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\DeleteUserRequest;
-use App\Http\Requests\Api\ListUsersRequest;
-use App\Http\Requests\Api\StoreUserRequest;
-use App\Http\Requests\Api\UpdateUserPasswordRequest;
-use App\Http\Requests\Api\UpdateUserRequest;
-use App\Http\Requests\Api\UpdateUserStatusRequest;
+use App\Http\Requests\Api\Users\DeleteUserRequest;
+use App\Http\Requests\Api\Users\StoreUserRequest;
+use App\Http\Requests\Api\Users\UpdateUserPasswordRequest;
+use App\Http\Requests\Api\Users\UpdateUserRequest;
+use App\Http\Requests\Api\Users\UpdateUserStatusRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +18,7 @@ use Throwable;
 
 class UsersController extends Controller
 {
-    public function index(ListUsersRequest $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
             $paginatedUsers = User::query()
