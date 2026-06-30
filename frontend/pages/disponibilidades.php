@@ -38,7 +38,7 @@ $pageConfig = [
                         class="btn btn-primary"
                         data-bs-toggle="modal"
                         data-bs-target="#modal-cadastro-agendamento">
-                        Cadastrar agendamento
+                        Cadastrar disponibilidade do atendente
                     </button>
                 </div>
             </div>
