@@ -5,16 +5,18 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class AdminUserSeeder extends Seeder
+class UsuarioAdministradorSeeder extends Seeder
 {
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        $usuarioAdministrador = User::query()->updateOrCreate(
             ['email' => 'admin@admin.com'],
             [
                 'name' => 'Administrador',
                 'password' => '123qwe!!',
             ],
         );
+
+        $usuarioAdministrador->syncRoles(['Administrador']);
     }
 }
