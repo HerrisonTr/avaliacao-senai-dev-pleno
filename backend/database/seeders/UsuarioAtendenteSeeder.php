@@ -9,14 +9,43 @@ class UsuarioAtendenteSeeder extends Seeder
 {
     public function run(): void
     {
-        $usuarioAtendente = User::query()->updateOrCreate(
-            ['email' => 'atendente@atendente.com'],
+        $atendentes = [
             [
+                'email' => 'atendente@atendente.com',
                 'name' => 'Atendente',
-                'password' => '123qwe!!',
             ],
-        );
+            [
+                'email' => 'ana.souza@atendente.com',
+                'name' => 'Ana Souza',
+            ],
+            [
+                'email' => 'bruno.costa@atendente.com',
+                'name' => 'Bruno Costa',
+            ],
+            [
+                'email' => 'camila.oliveira@atendente.com',
+                'name' => 'Camila Oliveira',
+            ],
+            [
+                'email' => 'diego.almeida@atendente.com',
+                'name' => 'Diego Almeida',
+            ],
+            [
+                'email' => 'fernanda.lima@atendente.com',
+                'name' => 'Fernanda Lima',
+            ],
+        ];
 
-        $usuarioAtendente->syncRoles(['Atendente']);
+        foreach ($atendentes as $atendente) {
+            $usuarioAtendente = User::query()->updateOrCreate(
+                ['email' => $atendente['email']],
+                [
+                    'name' => $atendente['name'],
+                    'password' => '123qwe!!',
+                ],
+            );
+
+            $usuarioAtendente->syncRoles(['Atendente']);
+        }
     }
 }
