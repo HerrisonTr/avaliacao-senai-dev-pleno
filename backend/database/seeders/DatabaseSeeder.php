@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             FuncoesUsuariosSeeder::class,
             UsuarioAdministradorSeeder::class,
             UsuarioAtendenteSeeder::class,
+            ServiceSeeder::class,
         ]);
     }
 }
