@@ -25,19 +25,36 @@ Projeto com backend em Laravel e frontend separado, ambos executados com Docker.
 
 ## Como rodar com Docker
 
-### 1. Subir os containers
+### 1. Criar o arquivo de ambiente do Docker Compose
+
+O Docker Compose usa um arquivo `.env` na raiz do projeto para definir o usuario do container `app`. Isso evita que o Laravel gere arquivos com permissões incorretas no host.
+
+```bash
+cp .env.example .env
+```
+
+Depois, ajuste os valores de `APP_UID` e `APP_GID` no arquivo `.env` da raiz com o UID e o GID do seu usuario no host.
+
+Para descobrir esses valores, use:
+
+```bash
+id -u
+id -g
+```
+
+### 2. Subir os containers
 
 ```bash
 docker compose up -d --build
 ```
 
-### 2. Criar o arquivo de ambiente do backend
+### 3. Criar o arquivo de ambiente do backend
 
 ```bash
 cp backend/.env.example backend/.env
 ```
 
-### 3. Configurar o banco no backend
+### 4. Configurar o banco no backend
 
 No arquivo `backend/.env`, ajuste os dados abaixo:
 
@@ -53,38 +70,38 @@ DB_USERNAME=herrison
 DB_PASSWORD=123456
 ```
 
-### 4. Instalar dependencias do backend
+### 5. Instalar dependencias do backend
 
 ```bash
 docker compose exec app composer install
 ```
 
-### 5. Gerar a chave da aplicacao
+### 6. Gerar a chave da aplicacao
 
 ```bash
 docker compose exec app php artisan key:generate
 ```
 
-### 6. Rodar as migrations
+### 7. Rodar as migrations
 
 ```bash
 docker compose exec app php artisan migrate
 ```
 
-### 7. Acessar os ambientes
+### 8. Acessar os ambientes
 
 ```text
 API: http://localhost:8080
 Frontend: http://localhost:8090
 ```
 
-### 8. Popular o banco com os dados iniciais
+### 9. Popular o banco com os dados iniciais
 
 ```bash
 docker compose exec app php artisan db:seed
 ```
 
-### 9. Primeiro acesso
+### 10. Primeiro acesso
 
 Após rodar a seed, acesse o frontend em `http://localhost:8090` e entre com um dos usuários abaixo:
 
@@ -135,13 +152,13 @@ docker compose exec app php artisan db:seed
 
 ## Ajustando permissões
 
-Se houver erro de permissão no Laravel, execute os comandos abaixo dentro do container `app`:
+O container `app` usa os valores de `APP_UID` e `APP_GID` definidos no arquivo `.env` da raiz do projeto. Com isso, o comportamento esperado e que nao seja necessario corrigir permissões manualmente a cada execução.
+
+Se ainda houver erro de permissão no Laravel, execute os comandos abaixo dentro do container `app`:
 
 ```bash
 docker compose exec app chmod -R 775 /var/www/html/bootstrap/cache
 docker compose exec app chmod -R 775 /var/www/html/storage
-docker compose exec app chown -R www-data:www-data /var/www/html/bootstrap/cache
-docker compose exec app chown -R www-data:www-data /var/www/html/storage
 ```
 
 ## Erro de permissão no VS Code
@@ -149,8 +166,8 @@ docker compose exec app chown -R www-data:www-data /var/www/html/storage
 Se o workspace ficar com arquivos sem permissão para seu usuário no host, execute:
 
 ```bash
-sudo chown -R seu_usuario:seu_usuario camindo_do_projeto
-sudo chown -R herrison:www-data backend/storage backend/bootstrap/cache
+sudo chown -R seu_usuario:seu_usuario caminho_do_projeto
+sudo chown -R seu_usuario:seu_usuario backend/storage backend/bootstrap/cache
 sudo chmod -R 775 backend/storage backend/bootstrap/cache
 ```
 
@@ -167,6 +184,7 @@ Arquivos iniciais:
 ## Primeira execucao recomendada
 
 ```bash
+cp .env.example .env
 docker compose up -d --build
 cp backend/.env.example backend/.env
 docker compose exec app composer install
@@ -175,4 +193,4 @@ docker compose exec app php artisan migrate
 docker compose exec app php artisan db:seed
 ```
 
-Antes de rodar a migration, ajuste o `backend/.env` para usar MySQL com as credenciais mostradas acima. Depois da seed, o acesso ao sistema pode ser feito com os usuários `admin@admin.com` ou `atendente@atendente.com`, ambos com a senha `123qwe!!`.
+Antes de subir os containers, ajuste o arquivo `.env` da raiz com o `APP_UID` e o `APP_GID` do seu usuario. Antes de rodar a migration, ajuste o `backend/.env` para usar MySQL com as credenciais mostradas acima. Depois da seed, o acesso ao sistema pode ser feito com os usuários `admin@admin.com` ou `atendente@atendente.com`, ambos com a senha `123qwe!!`.

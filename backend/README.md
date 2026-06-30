@@ -78,9 +78,11 @@ php artisan db:seed
 
 ## Rodando com Docker
 
-Se estiver usando a estrutura principal do projeto:
+Se estiver usando a estrutura principal do projeto, execute os comandos a partir da raiz do repositório:
 
 ```bash
+cp .env.example .env
+# ajuste APP_UID e APP_GID no arquivo .env da raiz com os valores do seu host
 docker compose up -d --build
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
@@ -138,20 +140,19 @@ php artisan db:seed
 
 ## Permissões de escrita
 
+O ideal e configurar `APP_UID` e `APP_GID` no arquivo `.env` da raiz do projeto para que o container `app` rode com o mesmo usuario do host.
+
 Se houver erro de permissão no Laravel:
 
 ```bash
 chmod -R 775 /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
-
-chown -R www-data:www-data /var/www/html/bootstrap/cache
-chown -R www-data:www-data /var/www/html/storage
 ```
 
 Se estiver usando o projeto pelo host e o VS Code perder acesso aos arquivos:
 
 ```bash
 sudo chown -R herrison:herrison /home/herrison/projetos/avaliacao-senai/
-sudo chown -R herrison:www-data storage bootstrap/cache
+sudo chown -R herrison:herrison storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 ```
