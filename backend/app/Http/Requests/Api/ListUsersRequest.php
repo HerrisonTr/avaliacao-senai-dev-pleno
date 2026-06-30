@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListarUsuariosRequest extends FormRequest
+class ListUsersRequest extends FormRequest
 {
     public function authorize(): bool
     {

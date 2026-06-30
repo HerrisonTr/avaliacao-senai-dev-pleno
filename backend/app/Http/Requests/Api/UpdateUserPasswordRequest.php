@@ -3,26 +3,18 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-class CadastrarUsuarioRequest extends FormRequest
+class UpdateUserPasswordRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('user.create') ?? false;
+        return $this->user()?->can('user.update') ?? false;
     }
 
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'role_id' => [
-                'required',
-                'integer',
-                Rule::exists('roles', 'id')->where('guard_name', 'web'),
-            ],
-            'email' => ['required', 'email', 'unique:users,email'],
             'password' => [
                 'required',
                 'confirmed',
