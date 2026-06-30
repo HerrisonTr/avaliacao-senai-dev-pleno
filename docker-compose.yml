@@ -3,6 +3,7 @@ services:
     build:
       context: ./docker/php
     container_name: php_herrison
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
     working_dir: /var/www/html
     volumes:
       - ./backend:/var/www/html
