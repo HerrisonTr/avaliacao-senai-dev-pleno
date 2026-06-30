@@ -32,6 +32,7 @@ class AppointmentsController extends Controller
 
         $appointments = Appointment::query()
             ->with(['attendant:id,name', 'service:id,name,price,active'])
+            ->whereHas('attendant')
             ->when(
                 isset($filters['appointment_date']),
                 fn ($query) => $query->whereDate('appointment_date', $filters['appointment_date'])
@@ -50,9 +51,11 @@ class AppointmentsController extends Controller
             )
             ->orderBy('appointment_date')
             ->orderBy('start_time')
-            ->paginate(15);
+            ->get();
 
-        return response()->json($appointments, Response::HTTP_OK);
+        return response()->json([
+            'data' => $appointments,
+        ], Response::HTTP_OK);
     }
 
     /**
@@ -67,6 +70,7 @@ class AppointmentsController extends Controller
                 'data' => $this->schedulingService->availableTimes(
                     $data['appointment_date'],
                     (int) $data['attendant_id'],
+                    isset($data['ignore_appointment_id']) ? (int) $data['ignore_appointment_id'] : null,
                 ),
             ], Response::HTTP_OK);
         } catch (AppointmentConflictException $exception) {
@@ -96,6 +100,10 @@ class AppointmentsController extends Controller
      */
     public function show(Appointment $appointment): JsonResponse
     {
+        if ($response = $this->ensureAppointmentAttendantExists($appointment)) {
+            return $response;
+        }
+
         $appointment->load(['attendant:id,name', 'service:id,name,price,active']);
 
         return response()->json([
@@ -133,6 +141,10 @@ class AppointmentsController extends Controller
         UpdateAppointmentRequest $request,
         Appointment $appointment
     ): JsonResponse {
+        if ($response = $this->ensureAppointmentAttendantExists($appointment)) {
+            return $response;
+        }
+
         try {
             $appointment = $this->schedulingService->update(
                 $appointment,
@@ -161,6 +173,10 @@ class AppointmentsController extends Controller
         UpdateAppointmentStatusRequest $request,
         Appointment $appointment
     ): JsonResponse {
+        if ($response = $this->ensureAppointmentAttendantExists($appointment)) {
+            return $response;
+        }
+
         try {
             $status = AppointmentStatus::from($request->validated()['status']);
             $appointment = $this->schedulingService->changeStatus($appointment, $status);
@@ -189,5 +205,16 @@ class AppointmentsController extends Controller
             'message' => $exception->getMessage(),
             'alternative_attendants' => $exception->alternativeAttendants,
         ], Response::HTTP_CONFLICT);
+    }
+
+    private function ensureAppointmentAttendantExists(Appointment $appointment): ?JsonResponse
+    {
+        if ($appointment->attendant()->exists()) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => 'Agendamento não encontrado.',
+        ], Response::HTTP_NOT_FOUND);
     }
 }

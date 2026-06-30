@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [UsersController::class, 'store'])->middleware('can:user.create');
         Route::put('/{user}', [UsersController::class, 'update'])->middleware('can:user.update');
         Route::delete('/{user}', [UsersController::class, 'destroy'])->middleware('can:user.delete');
-        Route::patch('/{user}/password', [UsersController::class, 'updatePassword'])->middleware('can:user.update');
+        Route::patch('/{user}/password', [UsersController::class, 'updatePassword']);
         Route::patch('/{user}/status', [UsersController::class, 'updateStatus'])->middleware('can:user.update');
     });
 

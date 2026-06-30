@@ -50,12 +50,7 @@ class UpdateUserRequest extends FormRequest
 
         return [
             'name' => ['required', 'string'],
-            'role_id' => $regrasRole,
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users', 'email')->ignore($usuario?->id),
-            ],
+            'role_id' => $regrasRole
         ];
     }
 }

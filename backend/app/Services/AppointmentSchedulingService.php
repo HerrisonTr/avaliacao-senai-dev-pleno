@@ -113,9 +113,12 @@ class AppointmentSchedulingService
     }
 
     /**
-     * @return list<array{start_time: string, end_time: string}>
+     * @return array{
+     *     available: list<array{start_time: string, end_time: string}>,
+     *     occupied: list<array{start_time: string, end_time: string}>
+     * }
      */
-    public function availableTimes(string $date, int $attendantId): array
+    public function availableTimes(string $date, int $attendantId, ?int $ignoreAppointmentId = null): array
     {
         $attendant = User::query()->find($attendantId);
         $this->ensureAttendantIsValid($attendant);
@@ -132,28 +135,45 @@ class AppointmentSchedulingService
             ->where('attendant_id', $attendantId)
             ->whereDate('appointment_date', $date)
             ->scheduled()
+            ->when(
+                $ignoreAppointmentId !== null,
+                fn ($query) => $query->whereKeyNot($ignoreAppointmentId)
+            )
             ->get(['start_time', 'end_time']);
 
         $now = CarbonImmutable::now();
         $slotIntervalMinutes = (int) config('appointments.slot_interval_minutes');
-        $slots = [];
+        $availableSlots = [];
+
+        // Retorna os agendamentos ocupados no formato consolidado inicio/fim.
+        $occupiedAppointments = $appointments
+            ->map(fn (Appointment $appointment): array => [
+                'start_time' => $appointment->start_time->format('H:i'),
+                'end_time' => $appointment->end_time->format('H:i'),
+            ])
+            ->unique(fn (array $appointment): string => $appointment['start_time'].'-'.$appointment['end_time'])
+            ->values()
+            ->all();
 
         foreach ($availabilities as $availability) {
             $cursor = CarbonImmutable::parse($date.' '.$availability->start_time->format('H:i'));
             $availabilityEnd = CarbonImmutable::parse($date.' '.$availability->end_time->format('H:i'));
 
+            // Quebra cada janela de disponibilidade em slots do intervalo configurado.
             while ($cursor->addMinutes($slotIntervalMinutes)->lessThanOrEqualTo($availabilityEnd)) {
                 $slotEnd = $cursor->addMinutes($slotIntervalMinutes);
                 $startTime = $cursor->format('H:i');
                 $endTime = $slotEnd->format('H:i');
 
+                // Verifica se existe qualquer agendamento sobrepondo o slot atual.
                 $isOccupied = $appointments->contains(
                     fn (Appointment $appointment): bool => $appointment->start_time->format('H:i') < $endTime
                         && $appointment->end_time->format('H:i') > $startTime
                 );
 
-                if ($cursor->greaterThan($now) && ! $isOccupied) {
-                    $slots[] = [
+                // Só expõe slots livres e posteriores ao horário atual.
+                if (! $isOccupied && $cursor->greaterThan($now)) {
+                    $availableSlots[] = [
                         'start_time' => $startTime,
                         'end_time' => $endTime,
                     ];
@@ -163,7 +183,10 @@ class AppointmentSchedulingService
             }
         }
 
-        return $slots;
+        return [
+            'available' => $availableSlots,
+            'occupied' => $occupiedAppointments,
+        ];
     }
 
     /**
