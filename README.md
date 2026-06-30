@@ -116,6 +116,28 @@ Rodar seeders:
 docker compose exec app php artisan db:seed
 ```
 
+## Ajustando permissões
+
+Se houver erro de permissão no Laravel, execute:
+
+```bash
+chmod -R 775 /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage
+
+chown -R www-data:www-data /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage
+```
+
+## Erro de permissão no VS Code
+
+Se o workspace ficar com arquivos sem permissão para seu usuário no host, execute:
+
+```bash
+sudo chown -R seu_usuario:seu_usuario camindo_do_projeto
+sudo chown -R herrison:www-data backend/storage backend/bootstrap/cache
+sudo chmod -R 775 backend/storage backend/bootstrap/cache
+```
+
 ## Frontend
 
 O frontend agora esta em `frontend/` e e servido por um container Nginx proprio.
