@@ -30,7 +30,8 @@ class AttendantAvailabilityController extends Controller
             $active = $filters['active'] ?? null;
 
             $query = AttendantAvailability::query()
-                ->with('attendant:id,name');
+                ->with('attendant:id,name')
+                ->whereHas('attendant');
 
             if ($attendantId !== null) {
                 $query->where('attendant_id', $attendantId);
