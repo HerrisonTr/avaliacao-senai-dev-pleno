@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,6 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="./assets/css/adminlte/adminlte.min.css">
 </head>
+
 <body class="login-page bg-body-secondary">
     <div class="login-box">
         <div class="login-logo">
@@ -20,23 +22,25 @@
             <div class="card-body login-card-body">
                 <p class="login-box-msg">Faça login para acessar o sistema</p>
 
-                <form action="#" method="post">
+                <form id="login-form" novalidate>
                     <div class="input-group mb-3">
-                        <input type="email" name="email" class="form-control" placeholder="E-mail">
+                        <input type="email" name="email" class="form-control" placeholder="E-mail" required>
                         <div class="input-group-text">
                             <span class="bi bi-envelope"></span>
                         </div>
                     </div>
 
                     <div class="input-group mb-3">
-                        <input type="password" name="senha" class="form-control" placeholder="Senha">
+                        <input type="password" name="senha" class="form-control" placeholder="Senha" required>
                         <div class="input-group-text">
                             <span class="bi bi-lock-fill"></span>
                         </div>
                     </div>
 
+                    <div id="login-feedback" class="alert alert-danger d-none" role="alert"></div>
+
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Entrar</button>
+                        <button type="submit" id="login-submit" class="btn btn-primary">Entrar</button>
                     </div>
                 </form>
             </div>
@@ -46,5 +50,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
     <script src="./assets/js/adminlte/adminlte.min.js"></script>
+
+    <script type="module" src="./assets/js/pages/login.js"></script>
 </body>
+
 </html>

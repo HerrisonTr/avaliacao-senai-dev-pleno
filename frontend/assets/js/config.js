@@ -4,3 +4,8 @@ export const BASE_URL = 'http://localhost:8090';
 export function base_url(page, extension = '.php') {
     return `${BASE_URL}/${page}${extension}`;
 }
+
+export const routes = {
+    dashboard: base_url('pages/dashboard'),
+    usuarios: base_url('pages/usuarios'),
+};

@@ -3,54 +3,108 @@ import { base_url } from './config.js';
 
 const TOKEN_KEY = 'access_token';
 const USER_KEY = 'auth_user';
+const LOGIN_MESSAGE_KEY = 'login_message';
+
+export function setToken(token) {
+    localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function getToken() {
+    return localStorage.getItem(TOKEN_KEY);
+}
+
+export function removeToken() {
+    localStorage.removeItem(TOKEN_KEY);
+}
+
+export function setUser(user) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+export function getUser() {
+    const user = localStorage.getItem(USER_KEY);
+
+    if (!user) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(user);
+    } catch {
+        return null;
+    }
+}
+
+export function removeUser() {
+    localStorage.removeItem(USER_KEY);
+}
+
+export function getPermissions() {
+    return getUser()?.permissions ?? [];
+}
+
+export function hasPermission(permission) {
+    return getPermissions().includes(permission);
+}
+
+export function clearSession() {
+    removeToken();
+    removeUser();
+}
+
+export function setLoginMessage(message) {
+    if (message) {
+        sessionStorage.setItem(LOGIN_MESSAGE_KEY, message);
+    }
+}
+
+export function consumeLoginMessage() {
+    const message = sessionStorage.getItem(LOGIN_MESSAGE_KEY);
+
+    if (message) {
+        sessionStorage.removeItem(LOGIN_MESSAGE_KEY);
+    }
+
+    return message;
+}
+
+export function redirectToLogin(message = '') {
+    setLoginMessage(message);
+    window.location.href = base_url('index');
+}
+
+export function redirectToDashboard() {
+    window.location.href = base_url('pages/dashboard');
+}
+
+export function handleUnauthorized(message = 'Sua sessão expirou. Faça login novamente.') {
+    clearSession();
+    redirectToLogin(message);
+}
 
 export const auth = {
-    setToken(token) {
-        localStorage.setItem(TOKEN_KEY, token);
-    },
-
-    getToken() {
-        return localStorage.getItem(TOKEN_KEY);
-    },
-
-    removeToken() {
-        localStorage.removeItem(TOKEN_KEY);
-    },
-
-    setUser(user) {
-        localStorage.setItem(USER_KEY, JSON.stringify(user));
-    },
-
-    getUser() {
-        const user = localStorage.getItem(USER_KEY);
-
-        if (!user) {
-            return null;
-        }
-
-        try {
-            return JSON.parse(user);
-        } catch {
-            return null;
-        }
-    },
-
-    removeUser() {
-        localStorage.removeItem(USER_KEY);
-    },
+    setToken,
+    getToken,
+    removeToken,
+    setUser,
+    getUser,
+    getPermissions,
+    hasPermission,
+    removeUser,
+    clearSession,
 
     isAuthenticated() {
-        return Boolean(this.getToken());
+        return Boolean(getToken());
     },
 
     isAdmin() {
-        const user = this.getUser();
-        return user?.role === 'Administrador' || user?.role === 'admin';
+        const user = getUser();
+        return user?.role === 'Administrador';
     },
 
     isAttendant() {
-        const user = this.getUser();
-        return user?.role === 'Atendente' || user?.role === 'attendant';
+        const user = getUser();
+        return user?.role === 'Atendente';
     },
 
     async login(email, password) {
@@ -59,13 +113,12 @@ export const auth = {
             password,
         });
 
-        this.setToken(response.token);
+        setToken(response.token);
 
         if (response.user) {
-            this.setUser(response.user);
+            setUser(response.user);
         } else {
-            const user = await this.me();
-            this.setUser(user);
+            await this.me();
         }
 
         return response;
@@ -75,25 +128,62 @@ export const auth = {
         try {
             await http.post('/logout');
         } finally {
-            this.clearSession();
-            window.location.href = base_url('index');
+            clearSession();
+            redirectToLogin('Logout realizado com sucesso.');
         }
     },
 
     async me() {
-        const user = await http.get('/me');
-        this.setUser(user);
+        const response = await http.get('/me');
+        const user = response?.user ?? response;
+
+        if (user) {
+            setUser(user);
+        }
+
         return user;
     },
 
-    clearSession() {
-        this.removeToken();
-        this.removeUser();
+    async protectPage(options = {}) {
+        const {
+            requireAdmin = false,
+            redirectIfUnauthorized = true,
+        } = options;
+
+        if (!this.isAuthenticated()) {
+            if (redirectIfUnauthorized) {
+                redirectToLogin('Faça login para acessar esta página.');
+            }
+
+            return false;
+        }
+
+        try {
+            const user = await this.me();
+
+            if (requireAdmin && user?.role !== 'Administrador') {
+                if (redirectIfUnauthorized) {
+                    redirectToDashboard();
+                }
+
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            clearSession();
+
+            if (redirectIfUnauthorized) {
+                redirectToLogin('Sua sessão expirou. Faça login novamente.');
+            }
+
+            return false;
+        }
     },
 
     requireAuth() {
         if (!this.isAuthenticated()) {
-            window.location.href = base_url('index');
+            redirectToLogin('Faça login para continuar.');
             return false;
         }
 
@@ -106,7 +196,7 @@ export const auth = {
         }
 
         if (!this.isAdmin()) {
-            window.location.href = base_url('index');
+            redirectToDashboard();
             return false;
         }
 
