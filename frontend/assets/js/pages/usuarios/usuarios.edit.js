@@ -28,10 +28,6 @@ function validateEditUserForm(payload) {
         errors.name = 'Informe o nome.';
     }
 
-    if (!payload.email) {
-        errors.email = 'Informe o e-mail.';
-    }
-
     if (!payload.role_id) {
         errors.role_id = 'Selecione o perfil.';
     }

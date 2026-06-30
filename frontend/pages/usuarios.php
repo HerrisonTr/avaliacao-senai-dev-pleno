@@ -139,7 +139,7 @@ $pageConfig = [
                         </div>
                         <div class="col-md-6">
                             <label for="editar-email" class="form-label">E-mail *</label>
-                            <input type="email" id="editar-email" name="email" class="form-control" required>
+                            <input type="email" disabled id="editar-email" name="email" class="form-control">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="col-12">

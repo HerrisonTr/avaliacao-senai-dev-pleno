@@ -84,8 +84,7 @@ class UsersController extends Controller
 
             $updatedUser = DB::transaction(function () use ($validatedData, $role, $user): User {
                 $user->update([
-                    'name' => $validatedData['name'],
-                    'email' => $validatedData['email'],
+                    'name' => $validatedData['name']
                 ]);
 
                 $user->syncRoles([$role]);
